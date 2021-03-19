@@ -62,6 +62,22 @@ open class PagerTabStripViewController: UIViewController, UIScrollViewDelegate {
     open private(set) var currentIndex = 0
     open private(set) var preCurrentIndex = 0 // used *only* to store the index to which move when the pager becomes visible
 
+    private var isLandscape: Bool {
+        return UIDevice.current.orientation == .landscapeLeft ||
+            UIDevice.current.orientation == .landscapeRight
+    }
+    private var superviewFrame: CGRect {
+        
+        var frame: CGRect = view.bounds
+        if (isLandscape) {
+            if #available(iOS 11, *) {
+                frame = view.safeAreaLayoutGuide.layoutFrame
+            }
+        }
+        
+        return frame
+    }
+    
     open var pageWidth: CGFloat {
         return containerView.bounds.width
     }
@@ -86,13 +102,8 @@ open class PagerTabStripViewController: UIViewController, UIScrollViewDelegate {
     override open func viewDidLoad() {
         super.viewDidLoad()
         
-        var safeAreaFrame: CGRect = view.bounds
-        if #available(iOS 11, *) {
-            safeAreaFrame = view.safeAreaLayoutGuide.layoutFrame
-        }
-        
         let containerViewAux = containerView ?? {
-            let containerView = UIScrollView(frame: CGRect(x: 0, y: 0, width: safeAreaFrame.width, height: safeAreaFrame.height))
+            let containerView = UIScrollView(frame: CGRect(x: 0, y: 0, width: superviewFrame.width, height: superviewFrame.height))
             containerView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
             return containerView
         }()
@@ -160,6 +171,13 @@ open class PagerTabStripViewController: UIViewController, UIScrollViewDelegate {
             return
         }
 
+        var top: CGFloat = .zero
+        if (isLandscape) {
+            if #available(iOS 11, *) {
+                top = -containerView.adjustedContentInset.top
+            }
+        }
+        
         if animated && pagerBehaviour.skipIntermediateViewControllers && abs(currentIndex - index) > 1 {
             var tmpViewControllers = viewControllers
             let currentChildVC = viewControllers[currentIndex]
@@ -168,12 +186,12 @@ open class PagerTabStripViewController: UIViewController, UIScrollViewDelegate {
             tmpViewControllers[currentIndex] = fromChildVC
             tmpViewControllers[fromIndex] = currentChildVC
             pagerTabStripChildViewControllersForScrolling = tmpViewControllers
-            containerView.setContentOffset(CGPoint(x: pageOffsetForChild(at: fromIndex), y: 0), animated: false)
+            containerView.setContentOffset(CGPoint(x: pageOffsetForChild(at: fromIndex), y: top), animated: false)
             (navigationController?.view ?? view).isUserInteractionEnabled = !animated
-            containerView.setContentOffset(CGPoint(x: pageOffsetForChild(at: index), y: 0), animated: true)
+            containerView.setContentOffset(CGPoint(x: pageOffsetForChild(at: index), y: top), animated: true)
         } else {
             (navigationController?.view ?? view).isUserInteractionEnabled = !animated
-            containerView.setContentOffset(CGPoint(x: pageOffsetForChild(at: index), y: 0), animated: animated)
+            containerView.setContentOffset(CGPoint(x: pageOffsetForChild(at: index), y: top), animated: animated)
         }
     }
 
@@ -205,7 +223,7 @@ open class PagerTabStripViewController: UIViewController, UIScrollViewDelegate {
     }
 
     open func offsetForChild(at index: Int) -> CGFloat {
-        return (CGFloat(index) * containerView.bounds.width) + ((containerView.bounds.width - view.bounds.width) * 0.5)
+        return (CGFloat(index) * containerView.bounds.width) + ((containerView.bounds.width - superviewFrame.width) * 0.5)
     }
 
     open func offsetForChild(viewController: UIViewController) throws -> CGFloat {
@@ -244,23 +262,23 @@ open class PagerTabStripViewController: UIViewController, UIScrollViewDelegate {
         let pagerViewControllers = pagerTabStripChildViewControllersForScrolling ?? viewControllers
         containerView.contentSize = CGSize(width: containerView.bounds.width * CGFloat(pagerViewControllers.count), height: containerView.contentSize.height)
 
-        var safeAreaFrame: CGRect = view.bounds
         var bottomHeight: CGFloat = .zero
-        if #available(iOS 11, *) {
-            safeAreaFrame = view.safeAreaLayoutGuide.layoutFrame
-            bottomHeight = containerView.safeAreaInsets.bottom
+        if (isLandscape) {
+            if #available(iOS 11, *) {
+                bottomHeight = view.safeAreaInsets.bottom
+            }
         }
         
         for (index, childController) in pagerViewControllers.enumerated() {
             let pageOffsetForChild = self.pageOffsetForChild(at: index)
             if abs(containerView.contentOffset.x - pageOffsetForChild) < containerView.bounds.width {
                 if childController.parent != nil {
-                    childController.view.frame = CGRect(x: offsetForChild(at: index), y: 0, width: safeAreaFrame.width, height: containerView.bounds.height - bottomHeight)
+                    childController.view.frame = CGRect(x: offsetForChild(at: index), y: 0, width: superviewFrame.width, height: containerView.bounds.height - bottomHeight)
                     childController.view.autoresizingMask = [.flexibleHeight, .flexibleWidth]
                 } else {
                     childController.beginAppearanceTransition(true, animated: false)
                     addChild(childController)
-                    childController.view.frame = CGRect(x: offsetForChild(at: index), y: 0, width: safeAreaFrame.width, height: containerView.bounds.height - bottomHeight)
+                    childController.view.frame = CGRect(x: offsetForChild(at: index), y: 0, width: superviewFrame.width, height: containerView.bounds.height - bottomHeight)
                     childController.view.autoresizingMask = [.flexibleHeight, .flexibleWidth]
                     containerView.addSubview(childController.view)
                     childController.didMove(toParent: self)
