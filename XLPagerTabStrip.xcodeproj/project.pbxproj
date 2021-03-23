@@ -459,6 +459,7 @@
 				INFOPLIST_FILE = XLPagerTabStrip/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MARKETING_VERSION = "8.1.2-RG";
 				PRODUCT_BUNDLE_IDENTIFIER = com.xmartlabs.XLPagerTabStrip;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -480,6 +481,7 @@
 				INFOPLIST_FILE = XLPagerTabStrip/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				MARKETING_VERSION = "8.1.2-RG";
 				PRODUCT_BUNDLE_IDENTIFIER = com.xmartlabs.XLPagerTabStrip;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
