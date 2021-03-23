@@ -61,10 +61,10 @@ open class PagerTabStripViewController: UIViewController, UIScrollViewDelegate {
     open private(set) var viewControllers = [UIViewController]()
     open private(set) var currentIndex = 0
     open private(set) var preCurrentIndex = 0 // used *only* to store the index to which move when the pager becomes visible
-
+    
     private var isLandscape: Bool {
-        return UIDevice.current.orientation == .landscapeLeft ||
-            UIDevice.current.orientation == .landscapeRight
+        let orientation = deviceOrientation()
+        return orientation == .landscapeLeft || orientation == .landscapeRight
     }
     private var superviewFrame: CGRect {
         
@@ -208,6 +208,10 @@ open class PagerTabStripViewController: UIViewController, UIScrollViewDelegate {
 
     // MARK: - Helpers
 
+    open func deviceOrientation() -> UIDeviceOrientation {
+        return UIDevice.current.orientation
+    }
+    
     open func updateIfNeeded() {
         if isViewLoaded && !lastSize.equalTo(containerView.bounds.size) {
             updateContent()
